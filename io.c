@@ -1,3 +1,8 @@
+/*
+	AUTHOR: SCOTT VANDERWEIDE
+	CS 4540
+	ASSIGNMENT 1
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include "io.h"
@@ -6,9 +11,6 @@
 void loadIo(){}
 
 void checkIo(process*** ioCollection, int* ioCollectionSize, int* ioToMove){
-    // increment processes
-    // check curIo < io
-    // set return index if something needs to move
     *ioToMove = -1;
     int* i = malloc(sizeof(int));
     for(*i = 0; *i < *ioCollectionSize - 1; *i = *i + 1) {

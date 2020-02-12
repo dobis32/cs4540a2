@@ -1,3 +1,8 @@
+/*
+	AUTHOR: SCOTT VANDERWEIDE
+	CS 4540
+	ASSIGNMENT 1
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include "queue.h"
@@ -28,16 +33,3 @@ void enqueue(process** incomingProcess, process*** queue, int* queueSize) {
         printf("[you shouldn't see this] something here... %d %d\n", queue[0][*queueSize]->cpu, queue[0][*queueSize]->io);
     }
 }
-
-// void reallocQueue(process*** priorityQ, int* pqSize) {
-//     int size = 1;
-//     process** newPriorityQ = malloc(1);
-//     while(priorityQ[0][size] && size < *pqSize){
-//         // printf("hello %d\n", size);
-//         //printf("priority: %u cpu: %u io: %u\n", priorityQ[0][size]->priority, priorityQ[0][size]->cpu, priorityQ[0][size]->io);
-//         newPriorityQ = realloc(newPriorityQ, sizeof(process*) * size);
-//         newPriorityQ[size-1] = priorityQ[0][size];
-//         size++;
-//     }
-//     *pqSize = size - 1;
-// }

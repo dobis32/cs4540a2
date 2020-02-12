@@ -4,11 +4,11 @@
 typedef unsigned int ui;
 
 struct process_struct {
-    ui priority; // never changes
-    ui cpu;  // time in cpu before I/O
-    ui io; // time I/O takes
+    ui priority; // set in read process
+    ui cpu;  // set in read process
+    ui io; // set in read process
 
-    ui curCpu; // count of current time in CPU
+    ui curCpu; // init when loaded into cpu; increment when checked
     ui curIo;  // count of time waiting for I/O
     ui wait; // current count of time in ready queue
     ui curPrior; // adjusted for starvation

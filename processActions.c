@@ -1,3 +1,8 @@
+/*
+	AUTHOR: SCOTT VANDERWEIDE
+	CS 4540
+	ASSIGNMENT 1
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include "processActions.h"
@@ -17,7 +22,7 @@ void processIsFinished(process* processToMove) {
 }
 
 void loadCpu(process** cpuCurrentProcess, process*** priorityQ, int* priorityQSize){
-    printf("loading cpu\n");
+    // printf("loading cpu\n");
     // if(!cpuCurrentProcess[0]) printf("CPU is empty (as expected)\n");
     cpuCurrentProcess[0] = priorityQ[0][0];
     cpuCurrentProcess[0]->curCpu = 0;
@@ -37,18 +42,19 @@ void checkCpu(process** cpuCurrentProcess ,int quantum, int ticks, int* retValue
     } else {
         cpuCurrentProcess[0]->curCpu = cpuCurrentProcess[0]->curCpu + 1;
         cpuCurrentProcess[0]->cpuTotal = cpuCurrentProcess[0]->cpuTotal + 1;
-        // printf("process status: [tick %d] %d/%d\n", ticks, cpuCurrentProcess[0]->curCpu, cpuCurrentProcess[0]->cpu);
+
+        // printf("process status: [tick %d] cur %d total %d\n", ticks, cpuCurrentProcess[0]->curCpu, cpuCurrentProcess[0]->cpuTotal);
         if(cpuCurrentProcess[0]->cpuTotal + cpuCurrentProcess[0]->ioTotal >= cpuCurrentProcess[0]->runtime){
             printf("process finished...\n");
             cpuCurrentProcess[0]->isRunning = 0;
             cpuCurrentProcess[0] = NULL;
-            *retValue = 1;
+            *retValue = 4;
             *processesCompleted = *processesCompleted + 1;
         } else if(cpuCurrentProcess[0]->curCpu >= cpuCurrentProcess[0]->cpu){
-            printf("cpu burst finished!\n");
+            // printf("cpu burst finished!\n");
             *retValue = 2;
         } else if (cpuCurrentProcess[0]->curCpu % quantum == 0) {
-            printf("quantum reached... quantum: %d tick: %d\n", quantum, ticks);
+            // printf("quantum reached... quantum: %d tick: %d\n", quantum, ticks);
             *retValue = 3;
         }
     }    

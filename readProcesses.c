@@ -1,27 +1,12 @@
+/*
+	AUTHOR: SCOTT VANDERWEIDE
+	CS 4540
+	ASSIGNMENT 1
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include "readProcesses.h"
-#include "structs.h"
-
-// base insertion sort algorithm source: https://www.geeksforgeeks.org/insertion-sort/
-// void sortProcessByPriority(process** priorityQ, int n) {
-//     int* i = malloc(sizeof(int));
-//     int* j = malloc(sizeof(int));
-//     int* key = malloc(sizeof(int));
-//     for (*i = 1; *i < n; *i = *i + 1) { 
-//         *key = arr[i]; 
-//         *j = *i - 1; 
-  
-//         /* Move elements of arr[0..i-1], that are 
-//           greater than key, to one position ahead 
-//           of their current position */
-//         while (*j >= 0 && arr[j] > key) { 
-//             arr[j + 1] = arr[j]; 
-//             j = j - 1; 
-//         } 
-//         arr[j + 1] = key; 
-//     } 
-// } 
+#include "structs.h" 
 
 void allocProcess(process** allProcesses, int* processesRead) {
     if(*processesRead < 1){
@@ -35,7 +20,7 @@ void tickWait(process*** priorityQ, int priorityqSize, int waitTime) {
     int* i = malloc(sizeof(int));
     for(*i = 0; *i < priorityqSize - 1; *i = *i + 1) {
         priorityQ[0][*i]->wait = priorityQ[0][*i]->wait + 1;
-        if(priorityQ[0][*i]->wait % waitTime > priorityQ[0][*i]->priority) priorityQ[0][*i]->curPrior = priorityQ[0][*i]->wait % waitTime;
+        if(priorityQ[0][*i]->wait % waitTime == 0) priorityQ[0][*i]->curPrior = priorityQ[0][*i]->curPrior + 1;
         if(priorityQ[0][*i]->curPrior > 15) priorityQ[0][*i]->curPrior = 15;
     }
     free(i);
