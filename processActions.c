@@ -26,10 +26,10 @@ void loadCpu(process** cpuCurrentProcess, process*** priorityQ, int* priorityQSi
     // if(!cpuCurrentProcess[0]) printf("CPU is empty (as expected)\n");
     cpuCurrentProcess[0] = priorityQ[0][0];
     cpuCurrentProcess[0]->curCpu = 0;
-    cpuCurrentProcess[0]->waitSum = cpuCurrentProcess[0]->wait;
     if (cpuCurrentProcess[0]->wait < cpuCurrentProcess[0]->waitMin) cpuCurrentProcess[0]->waitMin = cpuCurrentProcess[0]->wait;
     if (cpuCurrentProcess[0]->wait > cpuCurrentProcess[0]->waitMax) cpuCurrentProcess[0]->waitMax = cpuCurrentProcess[0]->wait;
     cpuCurrentProcess[0]->wait = 0;
+    cpuCurrentProcess[0]->curPrior = cpuCurrentProcess[0]->priority;
     priorityQ[0][0] = NULL;
     // printf("%d/%d\n", cpuCurrentProcess[0]->curCpu, cpuCurrentProcess[0]->cpu);
 }
@@ -57,5 +57,18 @@ void checkCpu(process** cpuCurrentProcess ,int quantum, int ticks, int* retValue
             // printf("quantum reached... quantum: %d tick: %d\n", quantum, ticks);
             *retValue = 3;
         }
-    }    
+    }  
+    
+      
+}
+
+void tickWait(process*** priorityQ, int priorityqSize, int waitTime) {
+    int* i = malloc(sizeof(int));
+    for(*i = 0; *i < priorityqSize - 1; *i = *i + 1) {
+        priorityQ[0][*i]->wait = priorityQ[0][*i]->wait + 1;
+        priorityQ[0]->waitSum = cpuCurrentProcess[0]->waitSum + 1;
+        if(priorityQ[0][*i]->wait % waitTime == 0 && priorityQ[0][*i]->wait > 0) priorityQ[0][*i]->curPrior = priorityQ[0][*i]->curPrior + 1;
+        if(priorityQ[0][*i]->curPrior > 15) priorityQ[0][*i]->curPrior = 15;
+    }
+    free(i);
 }

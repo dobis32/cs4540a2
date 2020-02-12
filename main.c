@@ -45,6 +45,7 @@ int main(int argc, char * argv[]) {
         printf("queue populated size: %d\n", priorityqSize);
         sortProcessByPriority(&priorityQ, priorityqSize);
         loadCpu(&cpuCurrentProcess, &priorityQ, &priorityqSize);
+        cpuCurrentProcess[0].waitCount = 0;
         dequeue(&priorityQ, &priorityqSize);
         printf("cpu loaded... new pq size: %d\n", priorityqSize);
         // printf("priority Q reallocated, new size: %d\n", priorityqSize);

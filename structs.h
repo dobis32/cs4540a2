@@ -8,18 +8,18 @@ struct process_struct {
     ui cpu;  // set in read process
     ui io; // set in read process
 
-    ui curCpu; // init when loaded into cpu; increment when checked
+    ui curCpu; // init in loadCpu(); increment in checkCpu()
     ui curIo;  // count of time waiting for I/O
-    ui wait; // current count of time in ready queue
-    ui curPrior; // adjusted for starvation
-    ui cpuTotal; // sum of time in cpu
-    ui ioTotal; // sum of time doing io
-    ui runtime;
+    ui wait; // init in loadCpu(); increment in waitTick()
+    ui curPrior; // init in loadCpu(); increment in waitTick()
+    ui cpuTotal; // init when read in; increment in cpuCheck()
+    ui ioTotal; // init when read in; increment in ioTick()
+    ui runtime; // init when read in; cpuTotal + ioTotal > runtime checked in checkCpu()
 
     // statistics
-    ui waitSum; // total time in ready queue
-    ui waitCount; // how many times in ready queue (for average)
-    ui waitMin; // smallest time in ready queue
+    ui waitSum; // init when read in; increment in waitTick()
+    ui waitCount; // init when read in; increment in enqueue()
+    ui waitMin; // init when read in: evaluate => change in 
     ui waitMax; // longest time in ready queue
     ui isRunning; // 0 when no longer running
 };

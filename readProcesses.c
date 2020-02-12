@@ -16,16 +16,6 @@ void allocProcess(process** allProcesses, int* processesRead) {
     }
 }
 
-void tickWait(process*** priorityQ, int priorityqSize, int waitTime) {
-    int* i = malloc(sizeof(int));
-    for(*i = 0; *i < priorityqSize - 1; *i = *i + 1) {
-        priorityQ[0][*i]->wait = priorityQ[0][*i]->wait + 1;
-        if(priorityQ[0][*i]->wait % waitTime == 0) priorityQ[0][*i]->curPrior = priorityQ[0][*i]->curPrior + 1;
-        if(priorityQ[0][*i]->curPrior > 15) priorityQ[0][*i]->curPrior = 15;
-    }
-    free(i);
-}
-
 void initProcess(process* process) {
     process->curCpu = 0;
     process->curIo = 0;
