@@ -9,7 +9,7 @@
 #include "structs.h"
 #include "readProcesses.c"
 #include "priorityq.c"
-#include "processActions.c"
+#include "cpu.c"
 #include "queue.c"
 #include "io.c"
 
@@ -37,18 +37,7 @@ int main(int argc, char * argv[]) {
     infile = fopen("a2in.txt", "r");
 
 	if(infile) {
-		readProcesses(infile, &allProcesses, &processesRead);
-        fclose(infile);
-        printf("read %d processes from file\n", processesRead);         
-        populatePriorityQ(&priorityQ, &allProcesses, processesRead, &priorityqSize);
-        ioCollection = malloc(sizeof(process*) * processesRead);
-        printf("queue populated size: %d\n", priorityqSize);
-        sortProcessByPriority(&priorityQ, priorityqSize);
-        loadCpu(&cpuCurrentProcess, &priorityQ, &priorityqSize);
-        cpuCurrentProcess[0].waitCount = 0;
-        dequeue(&priorityQ, &priorityqSize);
-        printf("cpu loaded... new pq size: %d\n", priorityqSize);
-        // printf("priority Q reallocated, new size: %d\n", priorityqSize);
+        init();
         int i;
         for(i = 0; i < priorityqSize; i++) {
             priorityQ[i]->waitCount = priorityQ[i]->waitCount + 1;
@@ -57,18 +46,16 @@ int main(int argc, char * argv[]) {
             tickWait(&priorityQ, priorityqSize, osParams.wait);
             sortProcessByPriority(&priorityQ, priorityqSize);
             checkCpu(&cpuCurrentProcess, osParams.quantum, i, &cpuStatus, &processesCompleted);
-            if(cpuCurrentProcess && cpuStatus == 4) printf("[tick %d] checked cpu... %d / %d status: %d\n", i, cpuCurrentProcess[0].curCpu, cpuCurrentProcess[0].cpu, cpuStatus);
             if(cpuStatus == 1 || cpuStatus == 4){ // cpu empty
                 if(priorityqSize > 0) {
                     loadCpu(&cpuCurrentProcess, &priorityQ, &priorityqSize);
                     dequeue(&priorityQ, &priorityqSize);
                 } else {
                     printf("priority Q empty.. aborting loop\n");
-                    i = 2600;
+                    i = 140000;
                 }
             } else if(cpuStatus == 2){ // move to IO
                 addToIOCollection(&ioCollection, &cpuCurrentProcess, &ioCollectionSize);
-                // printf("adding to IO...\nIO collection size: %d\n", ioCollectionSize);
                 cpuCurrentProcess = NULL;
                 if(priorityqSize > 0) {
                     loadCpu(&cpuCurrentProcess, &priorityQ, &priorityqSize);
@@ -88,13 +75,10 @@ int main(int argc, char * argv[]) {
             while(ioToMove >= 0) {
                 ioCollection[ioToMove]->ioTotal = ioCollection[ioToMove]->curIo;
                 ioCollection[ioToMove]->curIo = 0;
-                // printf("enqueueing from io...\n");
                 enqueue(&ioCollection[ioToMove], &priorityQ, &priorityqSize);
                 sortProcessByPriority(&priorityQ, priorityqSize);
-                // printf("priority q size: %d\n", priorityqSize);
                 ioCollection[ioToMove] = NULL;
                 shiftIoCollection(&ioCollection, &ioCollectionSize, ioToMove);
-                // printf("io collection size: %d\n", ioCollectionSize);
                 checkIo(&ioCollection, &ioCollectionSize, &ioToMove);
             }
         }
@@ -104,4 +88,18 @@ int main(int argc, char * argv[]) {
 		printf("failed to open file!\n closing program...\n");
     }
     return retval;
+}
+
+void init() {
+    readProcesses(infile, &allProcesses, &processesRead);
+    fclose(infile);
+    printf("read %d processes from file\n", processesRead);         
+    populatePriorityQ(&priorityQ, &allProcesses, processesRead, &priorityqSize);
+    ioCollection = malloc(sizeof(process*) * processesRead);
+    printf("queue populated size: %d\n", priorityqSize);
+    sortProcessByPriority(&priorityQ, priorityqSize);
+    loadCpu(&cpuCurrentProcess, &priorityQ, &priorityqSize);
+    cpuCurrentProcess[0].waitCount = 0;
+    dequeue(&priorityQ, &priorityqSize);
+    printf("cpu loaded... new pq size: %d\n", priorityqSize);
 }

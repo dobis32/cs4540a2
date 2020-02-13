@@ -8,22 +8,37 @@
 #include "processActions.h"
 #include "structs.h"
 
-
-void moveToWait(process* processToMove) {
-    printf("curCpu: %u\n", processToMove->curCpu);
+void sortProcessByPriority(process*** priorityQ, int numProcesses) {
+    int* i = malloc(sizeof(int));
+    int* j = malloc(sizeof(int));
+    process* key;
+    for (*i = 1; *i < numProcesses; *i = *i + 1) { 
+        key = priorityQ[0][*i]; 
+        *j = *i - 1; 
+        while (*j >= 0 && priorityQ[0][*j]->curPrior < key->curPrior) { 
+            priorityQ[0][*j + 1] = priorityQ[0][*j]; 
+            *j = *j - 1; 
+        } 
+        priorityQ[0][*j + 1] = key; 
+    } 
+    free(i);
+    free(j);
 }
 
-void moveToIo(process* processToMove) {
-    printf("curCpu: %u\n", processToMove->curCpu);
+void populatePriorityQ(process*** priorityQ, process** allProcesses, int numProcesses, int* pqSize) {
+    int* i = malloc(sizeof(int));
+    *pqSize = 0;
+    for(*i = 0; *i < numProcesses; *i = *i + 1) {
+        if(allProcesses[0][*i].isRunning > 0){
+            *pqSize = *pqSize + 1;
+            priorityQ[0] = realloc(priorityQ[0], sizeof(process*) * *pqSize);          
+            priorityQ[0][*pqSize-1] = &allProcesses[0][*i];
+        }
+    }
+    free(i);
 }
 
-void processIsFinished(process* processToMove) {
-    printf("curCpu: %u\n", processToMove->curCpu);
-}
-
-void loadCpu(process** cpuCurrentProcess, process*** priorityQ, int* priorityQSize){
-    // printf("loading cpu\n");
-    // if(!cpuCurrentProcess[0]) printf("CPU is empty (as expected)\n");
+void loadCpu(process** cpuCurrentProcess, process*** priorityQ, int* priorityQSize) {
     cpuCurrentProcess[0] = priorityQ[0][0];
     cpuCurrentProcess[0]->curCpu = 0;
     if (cpuCurrentProcess[0]->wait < cpuCurrentProcess[0]->waitMin) cpuCurrentProcess[0]->waitMin = cpuCurrentProcess[0]->wait;
@@ -31,35 +46,27 @@ void loadCpu(process** cpuCurrentProcess, process*** priorityQ, int* priorityQSi
     cpuCurrentProcess[0]->wait = 0;
     cpuCurrentProcess[0]->curPrior = cpuCurrentProcess[0]->priority;
     priorityQ[0][0] = NULL;
-    // printf("%d/%d\n", cpuCurrentProcess[0]->curCpu, cpuCurrentProcess[0]->cpu);
 }
+
 
 void checkCpu(process** cpuCurrentProcess ,int quantum, int ticks, int* retValue, int* processesCompleted) {
     *retValue = 0;
     if(!cpuCurrentProcess[0]) {
         *retValue = 1;
-        // printf("cpu empty...\n");
     } else {
         cpuCurrentProcess[0]->curCpu = cpuCurrentProcess[0]->curCpu + 1;
         cpuCurrentProcess[0]->cpuTotal = cpuCurrentProcess[0]->cpuTotal + 1;
-
-        // printf("process status: [tick %d] cur %d total %d\n", ticks, cpuCurrentProcess[0]->curCpu, cpuCurrentProcess[0]->cpuTotal);
         if(cpuCurrentProcess[0]->cpuTotal + cpuCurrentProcess[0]->ioTotal >= cpuCurrentProcess[0]->runtime){
-            printf("process finished...\n");
             cpuCurrentProcess[0]->isRunning = 0;
             cpuCurrentProcess[0] = NULL;
             *retValue = 4;
             *processesCompleted = *processesCompleted + 1;
         } else if(cpuCurrentProcess[0]->curCpu >= cpuCurrentProcess[0]->cpu){
-            // printf("cpu burst finished!\n");
             *retValue = 2;
         } else if (cpuCurrentProcess[0]->curCpu % quantum == 0) {
-            // printf("quantum reached... quantum: %d tick: %d\n", quantum, ticks);
             *retValue = 3;
         }
-    }  
-    
-      
+    }        
 }
 
 void tickWait(process*** priorityQ, int priorityqSize, int waitTime) {
@@ -71,4 +78,24 @@ void tickWait(process*** priorityQ, int priorityqSize, int waitTime) {
         if(priorityQ[0][*i]->curPrior > 15) priorityQ[0][*i]->curPrior = 15;
     }
     free(i);
+}
+
+void dequeue(process*** queue, int* queueSize) {
+    static int i = 0;
+    for(i = 0; i < *queueSize - 1; i = i + 1){
+        queue[0][i] = queue[0][i + 1];
+    }
+    queue[0][*queueSize - 1] = NULL;
+    *queueSize = *queueSize - 1;
+}
+
+void enqueue(process** incomingProcess, process*** queue, int* queueSize) {
+    if(!queue[0][*queueSize]) {
+        queue[0][*queueSize] = incomingProcess[0];
+        queue[0][*queueSize]->waitCount = queue[0][*queueSize]->waitCount + 1;
+        queue[0][*queueSize]->curPrior = queue[0][*queueSize]->priority + 1;
+        *queueSize = *queueSize + 1;
+    } else {
+        printf("[you shouldn't see this] something here... %d %d\n", queue[0][*queueSize]->cpu, queue[0][*queueSize]->io);
+    }
 }

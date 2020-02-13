@@ -1,23 +1,22 @@
+#
+#	AUTHOR: SCOTT VANDERWEIDE
+#	CS 4540
+#	ASSIGNMENT 1
+#
 CC=gcc
 CFLAGS= -ggdb -Wall -pedantic -std=c11
 
-make: clean readProcesses.o priorityq.o processActions.o io.o queue.o
+make: clean readProcesses.o cpu.o processActions.o io.o queue.o
 	$(CC) $(CFLAGS) -o a2 main.c
 
 readProcesses.o:
 	$(CC) $(CFLAGS) -c readProcesses.c
 
-priorityq.o:
-	$(CC) $(CFLAGS) -c priorityq.c
-
-processActions.o:
-	$(CC) $(CFLAGS) -c processActions.c
+cpu.o:
+	$(CC) $(CFLAGS) -c cpu.c
 
 io.o:
 	$(CC) $(CFLAGS) -c io.c
-
-queue.o:
-	$(CC) $(CFLAGS) -c queue.c
 
 test:
 	./a2
