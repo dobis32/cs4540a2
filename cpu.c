@@ -5,7 +5,6 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include "processActions.h"
 #include "structs.h"
 
 void sortProcessByPriority(process*** priorityQ, int numProcesses) {
@@ -23,6 +22,10 @@ void sortProcessByPriority(process*** priorityQ, int numProcesses) {
     } 
     free(i);
     free(j);
+    // printf("priorityQ:\n");
+    // for (int k = 0; k < numProcesses; k++) {
+    //     printf("%u wait: %u total: %u runtime: %u\n", priorityQ[0][k]->curPrior, priorityQ[0][k]->wait, priorityQ[0][k]->waitSum, priorityQ[0][k]->runtime);
+    // }
 }
 
 void populatePriorityQ(process*** priorityQ, process** allProcesses, int numProcesses, int* pqSize) {
@@ -33,6 +36,7 @@ void populatePriorityQ(process*** priorityQ, process** allProcesses, int numProc
             *pqSize = *pqSize + 1;
             priorityQ[0] = realloc(priorityQ[0], sizeof(process*) * *pqSize);          
             priorityQ[0][*pqSize-1] = &allProcesses[0][*i];
+            priorityQ[0][*pqSize-1]->curPrior = priorityQ[0][*pqSize-1]->priority;
         }
     }
     free(i);
@@ -57,6 +61,7 @@ void checkCpu(process** cpuCurrentProcess ,int quantum, int ticks, int* retValue
         cpuCurrentProcess[0]->curCpu = cpuCurrentProcess[0]->curCpu + 1;
         cpuCurrentProcess[0]->cpuTotal = cpuCurrentProcess[0]->cpuTotal + 1;
         if(cpuCurrentProcess[0]->cpuTotal + cpuCurrentProcess[0]->ioTotal >= cpuCurrentProcess[0]->runtime){
+            printf("PROCESS FINISHED runtime: %u / %u | cpu: %u | io: %u\n", cpuCurrentProcess[0]->cpuTotal + cpuCurrentProcess[0]->ioTotal, cpuCurrentProcess[0]->runtime, cpuCurrentProcess[0]->cpuTotal, cpuCurrentProcess[0]->ioTotal);
             cpuCurrentProcess[0]->isRunning = 0;
             cpuCurrentProcess[0] = NULL;
             *retValue = 4;
@@ -73,7 +78,7 @@ void tickWait(process*** priorityQ, int priorityqSize, int waitTime) {
     int* i = malloc(sizeof(int));
     for(*i = 0; *i < priorityqSize - 1; *i = *i + 1) {
         priorityQ[0][*i]->wait = priorityQ[0][*i]->wait + 1;
-        priorityQ[0]->waitSum = cpuCurrentProcess[0]->waitSum + 1;
+        priorityQ[0][*i]->waitSum = priorityQ[0][*i]->waitSum + 1;
         if(priorityQ[0][*i]->wait % waitTime == 0 && priorityQ[0][*i]->wait > 0) priorityQ[0][*i]->curPrior = priorityQ[0][*i]->curPrior + 1;
         if(priorityQ[0][*i]->curPrior > 15) priorityQ[0][*i]->curPrior = 15;
     }
@@ -87,14 +92,16 @@ void dequeue(process*** queue, int* queueSize) {
     }
     queue[0][*queueSize - 1] = NULL;
     *queueSize = *queueSize - 1;
+    // printf("dequeue -- new size: %d\n", *queueSize);
 }
 
 void enqueue(process** incomingProcess, process*** queue, int* queueSize) {
     if(!queue[0][*queueSize]) {
         queue[0][*queueSize] = incomingProcess[0];
         queue[0][*queueSize]->waitCount = queue[0][*queueSize]->waitCount + 1;
-        queue[0][*queueSize]->curPrior = queue[0][*queueSize]->priority + 1;
+        queue[0][*queueSize]->curPrior = queue[0][*queueSize]->priority;
         *queueSize = *queueSize + 1;
+        // printf("enqueue -- new size: %d\n", *queueSize);
     } else {
         printf("[you shouldn't see this] something here... %d %d\n", queue[0][*queueSize]->cpu, queue[0][*queueSize]->io);
     }

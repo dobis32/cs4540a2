@@ -6,8 +6,8 @@
 CC=gcc
 CFLAGS= -ggdb -Wall -pedantic -std=c11
 
-make: clean readProcesses.o cpu.o processActions.o io.o queue.o
-	$(CC) $(CFLAGS) -o a2 main.c
+make: clean cpu.o io.o readProcesses.o
+	$(CC) $(CFLAGS) -o a2 main.c cpu.o io.o readProcesses.o
 
 readProcesses.o:
 	$(CC) $(CFLAGS) -c readProcesses.c
